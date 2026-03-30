@@ -5,22 +5,18 @@ import numpy as np
 MODEL_NAME = "roberta-base"
 MAX_LENGTH = 128
 
-
 def load_data():
     dataset = load_dataset("go_emotions")
     return dataset
 
-
 def get_label_names(dataset):
     return dataset["train"].features["labels"].feature.names
-
 
 def multi_hot(labels, num_classes):
     vec = np.zeros(num_classes)
     for label in labels:
         vec[label] = 1
     return vec
-
 
 def preprocess(dataset):
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -35,33 +31,26 @@ def preprocess(dataset):
             max_length=MAX_LENGTH
         )
 
-        # Multi-label encoding
         encoding["labels"] = multi_hot(example["labels"], num_classes)
-
-        # 🔥 HYBRID MODEL ADDITION (IMPORTANT)
-        # Temporary dummy features (we will replace with real narrative features later)
-        # Format: [polarity, volatility, placeholder]
-        encoding["features"] = np.array([0.0, 0.0, 0.0], dtype=np.float32)
-
         return encoding
 
     dataset = dataset.map(tokenize, batched=False)
 
-    # ✅ Include features in torch format
+    # Set format for PyTorch
     dataset.set_format(
         type="torch",
-        columns=["input_ids", "attention_mask", "labels", "features"]
+        columns=["input_ids", "attention_mask", "labels"]
     )
 
     return dataset, label_names
 
 
-# Test block
 if __name__ == "__main__":
-    print("Testing data loader...")
-
     dataset = load_data()
-    dataset, labels = preprocess(dataset)
+    dataset, label_names = preprocess(dataset)
 
-    print("Dataset ready ✅")
-    print("Sample:", dataset["train"][0])
+    print(dataset)
+
+    sample = dataset["train"][0]
+    print("\nSample Processed:")
+    print(sample)

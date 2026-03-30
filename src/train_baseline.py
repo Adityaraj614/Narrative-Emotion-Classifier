@@ -4,69 +4,45 @@ from torch.optim import AdamW
 from sklearn.metrics import f1_score
 
 from data_loader import load_data, preprocess
-from hybrid_model import HybridEmotionModel
-from narrative_features import (
-    get_dominant_emotions,
-    compute_polarity_sequence,
-    compute_volatility
-)
+from model import EmotionClassifier
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# SAME SETTINGS AS HYBRID (IMPORTANT ⚖️)
 BATCH_SIZE = 16
 EPOCHS = 4
 LR = 2e-5
 
 
-
-def compute_features(labels_np, label_names):
-    features_np = []
-
-    for l in labels_np:
-        dominant = get_dominant_emotions([l], label_names)[0]
-        polarity = compute_polarity_sequence([dominant])[0]
-        volatility = compute_volatility(l)
-        intensity = max(l)
-
-        # 🔥 scaling (important)
-        volatility *= 10
-
-        features_np.append([
-            polarity,
-            volatility,
-            intensity
-        ])
-
-    return torch.tensor(features_np, dtype=torch.float32).to(DEVICE)
-
-
 def train():
-    print("🚀 Starting training pipeline...")
+    print("🚀 Starting BASELINE training pipeline...")
 
+    # =========================
+    # Load Data (SAME AS HYBRID)
+    # =========================
     dataset = load_data()
     print("✅ Dataset loaded")
 
     dataset, label_names = preprocess(dataset)
     print("✅ Preprocessing complete")
 
-    
-
     train_loader = DataLoader(dataset["train"], batch_size=BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(dataset["validation"], batch_size=BATCH_SIZE)
 
     print("✅ DataLoader ready")
 
-    num_features = 3  # ✅ final feature size
-
-    model = HybridEmotionModel(
-        num_labels=len(label_names),
-        num_features=num_features
-    ).to(DEVICE)
-
-    print("✅ Model loaded on", DEVICE)
+    # =========================
+    # Model (BASELINE)
+    # =========================
+    model = EmotionClassifier(num_labels=len(label_names)).to(DEVICE)
+    print("✅ Baseline model loaded on", DEVICE)
 
     optimizer = AdamW(model.parameters(), lr=LR)
-    loss_fn = torch.nn.BCEWithLogitsLoss()
+    loss_fn = torch.nn.BCEWithLogitsLoss()  # SAME as hybrid
 
+    # =========================
+    # Training Loop
+    # =========================
     for epoch in range(EPOCHS):
         print(f"\n🔥 Starting Epoch {epoch+1}")
 
@@ -78,14 +54,11 @@ def train():
             attention_mask = batch["attention_mask"].to(DEVICE)
             labels = batch["labels"].float().to(DEVICE)
 
-            labels_np = labels.cpu().numpy()
-
-            # 🔥 COMPUTE FEATURES
-            features = compute_features(labels_np, label_names)
-
             optimizer.zero_grad()
 
-            outputs = model(input_ids, attention_mask, features)
+            # ❌ NO narrative features here
+            outputs = model(input_ids, attention_mask)
+
             loss = loss_fn(outputs, labels)
 
             loss.backward()
@@ -99,14 +72,17 @@ def train():
         avg_loss = total_loss / len(train_loader)
         print(f"✅ Epoch {epoch+1} Loss: {avg_loss:.4f}")
 
-        evaluate(model, val_loader, label_names)
+        evaluate(model, val_loader)
 
-    torch.save(model.state_dict(), "models/emotion_model.pt")
-    print("💾 Model saved!")
+    # =========================
+    # Save Model
+    # =========================
+    torch.save(model.state_dict(), "models/baseline_model.pt")
+    print("💾 Baseline model saved!")
 
 
-def evaluate(model, dataloader, label_names):
-    print("🔍 Evaluating...")
+def evaluate(model, dataloader):
+    print("🔍 Evaluating BASELINE...")
 
     model.eval()
 
@@ -119,19 +95,18 @@ def evaluate(model, dataloader, label_names):
             attention_mask = batch["attention_mask"].to(DEVICE)
             labels = batch["labels"].cpu().numpy()
 
-            # 🔥 SAME FEATURES
-            features = compute_features(labels, label_names)
+            outputs = model(input_ids, attention_mask)
 
-            outputs = model(input_ids, attention_mask, features)
-            preds = torch.sigmoid(outputs).cpu().numpy()
+            probs = torch.sigmoid(outputs).cpu().numpy()
 
-            preds = (preds > 0.15).astype(int)
+            # SAME threshold as hybrid (IMPORTANT ⚖️)
+            preds = (probs > 0.15).astype(int)
 
             all_preds.extend(preds)
             all_labels.extend(labels)
 
     f1 = f1_score(all_labels, all_preds, average="macro", zero_division=0)
-    print(f"🎯 Validation Macro F1: {f1:.4f}")
+    print(f"🎯 BASELINE Validation Macro F1: {f1:.4f}")
 
 
 if __name__ == "__main__":
