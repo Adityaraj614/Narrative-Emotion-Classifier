@@ -35,7 +35,10 @@ def predict():
     data = request.get_json()
 
     if not data or "text" not in data:
-        return jsonify({"error": "Please provide 'text' in JSON"}), 400
+        return jsonify({
+            "status": "error",
+            "message": "Please provide 'text' in JSON"
+        }), 400
 
     text = data["text"]
     sentences = [text]
@@ -44,7 +47,7 @@ def predict():
 
     top_indices = np.argsort(probs[0])[-3:][::-1]
 
-    results = [
+    top_emotions = [
         {
             "emotion": label_names[i],
             "confidence": float(probs[0][i])
@@ -53,8 +56,9 @@ def predict():
     ]
 
     return jsonify({
-        "input": text,
-        "top_emotions": results
+        "status": "success",
+        "text": text,
+        "top_emotions": top_emotions
     })
 
 
@@ -65,19 +69,22 @@ def predict():
 def predict_narrative():
     data = request.get_json()
 
-    # Input validation
     if not data or "text" not in data:
-        return jsonify({"error": "Please provide 'text' as a list"}), 400
+        return jsonify({
+            "status": "error",
+            "message": "Please provide 'text' as a list"
+        }), 400
 
     texts = data["text"]
 
     if not isinstance(texts, list):
-        return jsonify({"error": "'text' must be a list of sentences"}), 400
+        return jsonify({
+            "status": "error",
+            "message": "'text' must be a list of sentences"
+        }), 400
 
-    # Model inference
     probs = predict_emotions(model, tokenizer, texts, label_names)
 
-    # Per sentence analysis
     sentence_results = []
 
     for i, sentence in enumerate(texts):
@@ -96,7 +103,6 @@ def predict_narrative():
             "top_emotions": top_emotions
         })
 
-    # Narrative features
     from narrative_features import (
         get_dominant_emotions,
         compute_polarity_sequence,
@@ -107,10 +113,6 @@ def predict_narrative():
     polarity_seq = compute_polarity_sequence(dominant)
     volatility = compute_volatility(probs)
 
-    # -------------------------
-    # Narrative Summary + Trend
-    # -------------------------
-
     # Trend detection
     if polarity_seq[0] == 1 and polarity_seq[-1] == -1:
         trend = "declining"
@@ -119,13 +121,12 @@ def predict_narrative():
     else:
         trend = "stable"
 
-    # Summary
     summary = f"Emotion shifts from {dominant[0]} to {dominant[-1]} showing a {trend} emotional trend"
 
-    # Final response
     return jsonify({
+        "status": "success",
         "num_sentences": len(texts),
-        "sentence_analysis": sentence_results,
+        "sentences": sentence_results,
         "narrative_analysis": {
             "dominant_emotions": dominant,
             "polarity_sequence": polarity_seq,
@@ -133,6 +134,54 @@ def predict_narrative():
             "trend": trend,
             "summary": summary
         }
+    })
+
+
+# =========================
+# Batch Prediction
+# =========================
+@app.route("/predict_batch", methods=["POST"])
+def predict_batch():
+    data = request.get_json()
+
+    if not data or "texts" not in data:
+        return jsonify({
+            "status": "error",
+            "message": "Please provide 'texts' as a list"
+        }), 400
+
+    texts = data["texts"]
+
+    if not isinstance(texts, list):
+        return jsonify({
+            "status": "error",
+            "message": "'texts' must be a list"
+        }), 400
+
+    probs = predict_emotions(model, tokenizer, texts, label_names)
+
+    predictions = []
+
+    for i, text in enumerate(texts):
+        top_indices = np.argsort(probs[i])[-3:][::-1]
+
+        top_emotions = [
+            {
+                "emotion": label_names[idx],
+                "confidence": float(probs[i][idx])
+            }
+            for idx in top_indices
+        ]
+
+        predictions.append({
+            "text": text,
+            "top_emotions": top_emotions
+        })
+
+    return jsonify({
+        "status": "success",
+        "num_inputs": len(texts),
+        "predictions": predictions
     })
 
 
