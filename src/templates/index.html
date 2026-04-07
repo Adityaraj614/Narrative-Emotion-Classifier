@@ -13,11 +13,16 @@
 
 <!-- 🔥 SLIDE PANEL -->
 <div id="side-panel" class="side-panel">
+
+    <!-- ✅ CLOSE BUTTON -->
+    <button class="close-btn" onclick="togglePanel()">✕</button>
+
     <h3>Chat History</h3>
     <div id="chat-history"></div>
 
     <h3>Emotion Trend</h3>
     <canvas id="emotionChart"></canvas>
+
 </div>
 
 <!-- MAIN CHAT -->
@@ -43,6 +48,8 @@
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- MAIN SCRIPT -->
 <script src="/static/script.js"></script>
 
 </body>

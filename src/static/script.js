@@ -254,5 +254,21 @@ function handleKey(event) {
 ========================= */
 function togglePanel() {
     const panel = document.getElementById("side-panel");
-    panel.classList.toggle("show");
+
+    if (panel.classList.contains("show")) {
+        panel.classList.remove("show");
+    } else {
+        panel.classList.add("show");
+    }
 }
+
+document.addEventListener("click", function (event) {
+    const panel = document.getElementById("side-panel");
+    const button = document.querySelector(".menu-btn");
+
+    if (panel.classList.contains("show")) {
+        if (!panel.contains(event.target) && !button.contains(event.target)) {
+            panel.classList.remove("show");
+        }
+    }
+});
