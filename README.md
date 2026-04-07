@@ -358,8 +358,6 @@ Replace that entire section with:
 # 🎮 7. How to Use the System
 
 Run:
-
-```bash
 python src/api.py
 
 Open in browser:
@@ -416,17 +414,17 @@ Chat history panel
 
 ![Mixed Emotion](assets/mixed.png)
 
-##🧠 9. Key Learnings
+## 🧠 9. Key Learnings
 Emotion is not static — it evolves
 Transformers are strong, but lack explicit temporal reasoning
 System design matters as much as model design
 
-##⚠️ 10. Limitations
+## ⚠️ 10. Limitations
 Trend logic is rule-based
 LSTM can be improved further
 No backend database (uses local storage)
 
-##🚀 11. Future Improvements
+## 🚀 11. Future Improvements
 Multi-chat sessions (like ChatGPT)
 Database integration
 Better temporal modeling
