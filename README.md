@@ -398,6 +398,24 @@ Typing animation
 Graph visualization
 Chat history panel
 
+## 📸 Demo
+
+### 🔻 Declining Emotion (Frustration Build-up)
+
+![Declining Emotion](assets/declining.png)
+
+---
+
+### 📈 Improving Emotion (Recovery Phase)
+
+![Improving Emotion](assets/improving.png)
+
+---
+
+### 🔄 Mixed Emotion (Confusion → Understanding)
+
+![Mixed Emotion](assets/mixed.png)
+
 ##🧠 9. Key Learnings
 Emotion is not static — it evolves
 Transformers are strong, but lack explicit temporal reasoning
