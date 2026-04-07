@@ -53,8 +53,6 @@ The chatbot is not intended to be a fully developed conversational agent, but ra
 
 ---
 
----
-
 # 🔍 3. Previous Work
 
 We began with a standard approach:
@@ -271,7 +269,6 @@ Narrative-Emotion-Classifier/
 ├── README.md
 └── requirements.txt
 ```
----
 
 ---
 
@@ -285,7 +282,6 @@ Right now it’s like plain text → not readable
 
 Replace that entire section with:
 
-```md
 ## 📂 Key File Responsibilities
 
 ### 🔹 Backend Core
