@@ -49,37 +49,83 @@ The chatbot is not intended to be a fully developed conversational agent, but ra
 
 - Emotion predictions  
 - Trend detection  
-- System behavior in real time  
+- System behavior in real time
 
 ---
 
-# 🔍 3. Previous Work
+# 🔍 3. Previous Work (Related Research)
 
-We began with a standard approach:
+Emotion recognition in text has been widely studied in Natural Language Processing (NLP), especially with the rise of transformer-based models.
 
-### ✅ Baseline Model
-- RoBERTa-based emotion classifier  
-- Multi-label classification using GoEmotions dataset  
+---
 
-### 🔥 Hybrid Model
-- Combined:
-  - RoBERTa embeddings  
-  - Narrative features (polarity, volatility, dominant emotion)
+### 📊 Emotion Classification (Static Models)
 
-### 📊 Observation
+Early approaches focused on classifying emotions at the sentence level using:
 
-| Model | Macro F1 |
-|------|---------|
-| RoBERTa | 0.515 |
-| Hybrid | 0.51 |
+- Traditional ML models (SVM, Naive Bayes)
+- Deep learning models (CNN, LSTM)
 
-👉 Insight:
-- Transformer models already capture strong contextual signals  
-- Simple narrative features were not enough to improve performance  
+With the introduction of transformers:
 
-This led to a key realization:
+- **BERT** and **RoBERTa** significantly improved performance
+- Models trained on datasets like **GoEmotions (Google)** enabled fine-grained emotion classification (27 emotion labels)
 
-> Emotion modeling requires **temporal understanding**, not just static features.
+👉 Limitation:
+These models treat each sentence independently and ignore conversational context.
+
+---
+
+### 💬 Context-Aware Emotion Detection
+
+Recent work explores emotion detection in conversations:
+
+- Models consider **previous utterances** for better understanding  
+- Use architectures like:
+  - LSTM over dialogue sequences  
+  - Transformer-based dialogue models  
+
+👉 Limitation:
+Most approaches still focus on classification, not **emotion evolution**
+
+---
+
+### 📈 Emotion Dynamics & Temporal Modeling
+
+Some research attempts to capture emotional progression:
+
+- Sequential models (LSTM, GRU) applied to conversations  
+- Emotion flow tracking in dialogues  
+
+👉 Limitation:
+- Often limited to prediction tasks  
+- Lack integration with real-time systems or user interaction  
+
+---
+
+### ⚠️ Gap Identified
+
+Despite advancements, existing systems:
+
+- Focus on **static emotion classification**  
+- Do not explicitly model **narrative flow of emotions**  
+- Rarely combine:
+  - Emotion detection  
+  - Temporal tracking  
+  - Interactive response generation  
+
+---
+
+### 💡 Our Contribution
+
+This project addresses these gaps by:
+
+- Modeling **emotion as a dynamic narrative process**  
+- Integrating:
+  - Transformer-based classification  
+  - Temporal modeling (LSTM)  
+  - Trend analysis (improving / declining / stable)  
+- Providing a **real-time interactive interface** to visualize emotional evolution  
 
 ---
 
@@ -142,48 +188,58 @@ We moved from **static classification → dynamic conversational system**
 - Initialized GitHub  
 
 ---
-
 ## 🟢 Phase 1 — Baseline Model
-- Implemented RoBERTa classifier  
-- Used CLS token representation  
 
-👉 Decision:
-Start with strong baseline before experimenting  
+- Implemented **RoBERTa-based emotion classifier**
+- Used CLS token embeddings for prediction  
+- Achieved **Macro F1: 0.515**
+
+👉 Decision:  
+Start with a strong transformer baseline  
 
 ---
 
 ## 🟢 Phase 2 — Data Pipeline
+
 - Tokenization using HuggingFace  
 - Multi-label encoding  
 
-👉 Decision:
-Maintain consistency with dataset for fair comparison  
+👉 Decision:  
+Maintain dataset consistency for fair evaluation  
 
 ---
 
 ## 🟢 Phase 3 — Narrative Features
-- Designed features:
-  - Polarity  
-  - Volatility  
-  - Dominant emotion  
 
-👉 Challenge:
-Features were not directly usable in real-time  
+Designed features:
+
+- Polarity (positive / negative / neutral)  
+- Volatility (emotion variation)  
+- Dominant emotion  
+
+👉 Challenge:  
+Features were not directly usable for real-time interaction  
 
 ---
 
 ## 🟢 Phase 4 — Hybrid Model
-- Combined text + narrative features  
 
-👉 Result:
-No significant improvement  
+- Combined:
+  - RoBERTa embeddings  
+  - Narrative features  
+
+- Achieved **Macro F1: 0.51**
+
+👉 Observation:
+No significant improvement over baseline  
 
 👉 Insight:
-Feature design alone is not enough  
+Transformer models already capture strong contextual signals  
 
 ---
 
 ## 🟢 Phase 5 — Training Pipeline
+
 - BCEWithLogitsLoss  
 - AdamW optimizer  
 - Macro F1 evaluation  
@@ -191,14 +247,70 @@ Feature design alone is not enough
 ---
 
 ## 🟢 Phase 6 — Model Comparison
-- Compared baseline vs hybrid  
+
+| Model   | Macro F1 |
+|--------|---------|
+| RoBERTa | 0.515 |
+| Hybrid  | 0.51  |
 
 👉 Key Learning:
-> Transformers already encode strong contextual signals  
+Feature engineering alone is insufficient for capturing emotional dynamics  
+
+---
+## 🟢 Phase 7 — Temporal Modeling with LSTM
+
+### 🧠 Why LSTM?
+
+While transformer models capture context within a sentence, they do not explicitly model **temporal progression across multiple messages**.
+
+Human conversations are sequential, where:
+
+- Emotions evolve gradually  
+- Previous context influences current state  
+
+👉 LSTM was introduced to:
+
+- Capture **emotion flow across time**
+- Model **sequential dependencies**
+- Understand how emotions **change across messages**
 
 ---
 
-## 🔥 Phase 7–10 — System Transformation
+### ⚙️ How LSTM is Used
+
+- Input: sequence of emotion features from previous messages  
+- Features include:
+  - Emotion scores  
+  - Polarity  
+  - Narrative features  
+
+- LSTM processes sequence step-by-step:
+  - Maintains hidden state (memory of past emotions)  
+  - Outputs updated emotional representation  
+
+---
+
+### 📊 Outcome
+
+Instead of predicting emotion independently:
+
+👉 System now understands:
+
+- Whether emotion is increasing  
+- Whether user is getting frustrated  
+- Whether situation is improving  
+
+---
+
+### 💡 Key Impact
+
+- Enabled **emotion trend detection**  
+- Improved system’s ability to respond contextually  
+- Transformed model from static → narrative-aware  
+
+---
+
+## 🔥 Phase 8–10 — System Transformation
 
 Shifted from **model → system thinking**
 
