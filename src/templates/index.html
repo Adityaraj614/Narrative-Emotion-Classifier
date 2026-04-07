@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emotion-Aware Chatbot</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- 🔥 TOP LEFT BUTTON -->
+<div class="top-bar">
+    <button class="menu-btn" onclick="togglePanel()">☰</button>
+</div>
+
+<!-- 🔥 SLIDE PANEL -->
+<div id="side-panel" class="side-panel">
+    <h3>Chat History</h3>
+    <div id="chat-history"></div>
+
+    <h3>Emotion Trend</h3>
+    <canvas id="emotionChart"></canvas>
+</div>
+
+<!-- MAIN CHAT -->
+<div class="chat-container">
+
+    <div class="chat-header">
+        Emotion-Aware Chatbot
+    </div>
+
+    <div id="chat-box" class="chat-box"></div>
+
+    <div class="input-area">
+        <input 
+            type="text" 
+            id="user-input" 
+            placeholder="Type your message..." 
+            onkeypress="handleKey(event)"
+        />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/script.js"></script>
+
+</body>
+</html>
