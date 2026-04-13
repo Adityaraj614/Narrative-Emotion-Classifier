@@ -193,26 +193,6 @@ Open in browser:
 http://127.0.0.1:5000/ui
 ---
 
-🧪 Example Interaction
-this is not working
-still broken
-this is getting worse
-
-👉 System detects:
-
-Emotion → frustration
-Trend → ⚠️ declining
-
-Then:
-
-okay it is better now
-yes it works
-great it is fixed
-
-👉 System detects:
-
-Trend → 📈 improving
-
 ## 📸 Demo
 
 ### 🔻 Declining Emotion (Frustration Build-up)
