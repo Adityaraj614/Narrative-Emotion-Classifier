@@ -1,5 +1,3 @@
-# src/train_lstm.py
-
 import torch
 import torch.nn as nn
 from torch.optim import Adam
@@ -13,12 +11,17 @@ from transformers import AutoTokenizer
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# 🔥 Updated settings
+# =========================
+# SETTINGS
+# =========================
 EPOCHS = 5
 LR = 1e-3
 SEQ_LEN = 3
 
 
+# =========================
+# CREATE SEQUENCES
+# =========================
 def create_sequences(texts, seq_len=3):
     sequences = []
 
@@ -31,6 +34,9 @@ def create_sequences(texts, seq_len=3):
     return sequences
 
 
+# =========================
+# TRAIN FUNCTION
+# =========================
 def train():
     print("🚀 Training LSTM...")
 
@@ -38,12 +44,11 @@ def train():
     # Load dataset
     # =========================
     dataset = load_data()
-
-    # 🔥 Increased data size
     texts = dataset["train"]["text"][:5000]
 
     label_names = get_label_names(dataset)
 
+    # 🔥 Load tokenizer + hybrid model
     tokenizer = AutoTokenizer.from_pretrained("roberta-base")
     emotion_model = load_model(len(label_names))
 
@@ -51,11 +56,10 @@ def train():
     # Create sequences
     # =========================
     sequences = create_sequences(texts, SEQ_LEN)
-
     print(f"Total sequences: {len(sequences)}")
 
     # =========================
-    # Model
+    # LSTM Model
     # =========================
     lstm_model = EmotionLSTM().to(DEVICE)
 
@@ -74,10 +78,14 @@ def train():
 
         for seq, target_text in tqdm(sequences):
 
-            # 🔥 Input sequence embeddings
-            seq_embeddings = get_sequence_embeddings(seq).to(DEVICE)
+            # 🔥 FIXED: Use SAME RoBERTa (no duplication)
+            seq_embeddings = get_sequence_embeddings(
+                seq,
+                tokenizer,
+                emotion_model.roberta
+            ).to(DEVICE)
 
-            # 🔥 Target emotion vector (28-dim)
+            # 🔥 Target emotion vector
             probs = predict_emotions(
                 emotion_model,
                 tokenizer,
@@ -112,5 +120,8 @@ def train():
     print("💾 LSTM model saved!")
 
 
+# =========================
+# MAIN
+# =========================
 if __name__ == "__main__":
     train()

@@ -1,5 +1,3 @@
-# src/response_generator.py
-
 import random
 
 RESPONSE_TEMPLATES = {
@@ -54,15 +52,28 @@ def generate_response(interpreted_emotions, trend=None, lstm_signal=None):
 
     primary_emotion, primary_score = interpreted_emotions[0]
 
-        # 🔥 LSTM-based signal (basic usage)
+    # =========================
+    # 🔥 LSTM INTELLIGENCE (FIXED)
+    # =========================
     if lstm_signal is not None:
-        if lstm_signal > 0.5:
-            return "It seems like this issue has been building up over time. Let’s try to resolve it step by step."
+        intensity = lstm_signal.get("intensity", 0)
+        variation = lstm_signal.get("variation", 0)
+
+        # 🔥 Emotional instability (highest priority)
+        if variation > 0.01:
+            return "I can sense your emotions are shifting quite a bit. Let’s take this step by step and sort it out."
+
+        # 🔥 Strong emotional buildup (check higher first)
+        if intensity > 0.5:
+            return "It seems like this has been building up. Let’s work through it together."
+
+        # 🔥 Medium intensity
+        if intensity > 0.25:
+            return "This seems quite intense. I'm here to help you through this."
 
     # =========================
     # 🔥 TREND-AWARE RESPONSES
     # =========================
-
     if trend == "declining":
         return random.choice([
             "I can see this is getting more frustrating over time. Let’s try to fix this together.",
@@ -84,7 +95,6 @@ def generate_response(interpreted_emotions, trend=None, lstm_signal=None):
     # =========================
     # 🔥 STRONG SINGLE EMOTION
     # =========================
-
     if primary_score > 0.6:
         responses = RESPONSE_TEMPLATES.get(primary_emotion, RESPONSE_TEMPLATES["neutral"])
         return random.choice(responses)
@@ -92,7 +102,6 @@ def generate_response(interpreted_emotions, trend=None, lstm_signal=None):
     # =========================
     # 🔥 MULTI-EMOTION LOGIC
     # =========================
-
     if len(interpreted_emotions) > 1:
         second_emotion, _ = interpreted_emotions[1]
 
@@ -113,6 +122,5 @@ def generate_response(interpreted_emotions, trend=None, lstm_signal=None):
     # =========================
     # 🔥 FALLBACK
     # =========================
-
     responses = RESPONSE_TEMPLATES.get(primary_emotion, RESPONSE_TEMPLATES["neutral"])
     return random.choice(responses)

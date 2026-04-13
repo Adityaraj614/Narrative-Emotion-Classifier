@@ -24,7 +24,7 @@ def load_model(num_labels):
         num_features=3  # same as training
     )
 
-    model.load_state_dict(torch.load("models/emotion_model.pt"))
+    model.load_state_dict(torch.load("models/emotion_model.pt", weights_only =True))
     print("✅ Trained model loaded")
 
     model.to(DEVICE)

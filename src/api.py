@@ -30,22 +30,25 @@ model = load_model(len(label_names))
 print("✅ Model loaded successfully")
 
 # =========================
-# 🔥 LSTM INIT
+# DEVICE
 # =========================
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# =========================
+# LOAD LSTM
+# =========================
 lstm_model = EmotionLSTM().to(DEVICE)
-lstm_model.load_state_dict(torch.load("models/lstm_model.pt"))
+lstm_model.load_state_dict(torch.load("models/lstm_model.pt", weights_only=True))
 lstm_model.eval()
 
 # =========================
-# 🔥 Global conversation memory
+# MEMORY
 # =========================
 memory = ConversationMemory(max_history=10)
 
 
 # =========================
-# Home Route
+# ROUTES
 # =========================
 @app.route("/")
 def home():
@@ -54,8 +57,10 @@ def home():
 @app.route("/ui")
 def ui():
     return render_template("index.html")
+
+
 # =========================
-# Single Sentence Prediction
+# SINGLE PREDICT
 # =========================
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -89,7 +94,7 @@ def predict():
 
 
 # =========================
-# 🔥 CHAT ENDPOINT (FINAL)
+# CHAT (FINAL)
 # =========================
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -103,12 +108,57 @@ def chat():
 
     text = data["text"]
 
-    # 🔥 Step 1 — Store message
+    # =========================
+    # STEP 1 — MEMORY
+    # =========================
     memory.add_message(text)
+    history = memory.get_history()[-5:]
 
-    # 🔥 Step 2 — Predict emotions
+    # =========================
+    # STEP 2 — HYBRID EMOTION
+    # =========================
     probs = predict_emotions(model, tokenizer, [text], label_names)
 
+    # =========================
+    # STEP 3 — LSTM SIGNAL + FUSION
+    # =========================
+    lstm_signal = None
+
+    if len(history) >= 2:
+        # 🔥 FIXED: use shared RoBERTa
+        seq_embeddings = get_sequence_embeddings(
+            history,
+            tokenizer,
+            model.roberta
+        ).to(DEVICE)
+
+        with torch.no_grad():
+            lstm_output = lstm_model(seq_embeddings)
+
+            # LSTM emotion vector
+            lstm_vector = lstm_output.squeeze().cpu().numpy()
+
+            # Sequence-based variation
+            seq_np = seq_embeddings.squeeze().cpu().numpy()
+
+            first_step = seq_np[0]
+            last_step = seq_np[-1]
+
+            delta = np.abs(last_step - first_step)
+
+            lstm_signal = {
+                "intensity": float(np.max(lstm_vector)),
+                "variation": float(np.mean(delta))
+            }
+
+            # Fusion
+            alpha = 0.7
+            beta = 0.3
+            probs[0] = alpha * probs[0] + beta * lstm_vector
+
+    # =========================
+    # STEP 4 — TOP EMOTIONS
+    # =========================
     top_indices = np.argsort(probs[0])[-3:][::-1]
 
     top_emotions = [
@@ -119,10 +169,14 @@ def chat():
         for i in top_indices
     ]
 
-    # 🔥 Step 3 — Interpret emotions
+    # =========================
+    # STEP 5 — INTERPRET
+    # =========================
     interpreted = interpret_emotions(top_emotions)
 
-    # 🔥 Step 4 — Trend analysis
+    # =========================
+    # STEP 6 — TREND
+    # =========================
     trend_result = analyze_conversation_trend(
         model,
         tokenizer,
@@ -133,23 +187,8 @@ def chat():
     trend = trend_result["trend"]
 
     # =========================
-    # 🔥 Step 5 — LSTM SIGNAL
+    # STEP 7 — RESPONSE
     # =========================
-    lstm_signal = None
-
-    history = memory.get_history()
-
-    if len(history) >= 2:
-        seq_embeddings = get_sequence_embeddings(history)
-
-        with torch.no_grad():
-            seq_embeddings = seq_embeddings.to(DEVICE)
-            lstm_output = lstm_model(seq_embeddings)
-
-            # simple scalar signal
-            lstm_signal = torch.mean(lstm_output).item()
-
-    # 🔥 Step 6 — Generate response
     response = generate_response(
         interpreted,
         trend=trend,
@@ -169,7 +208,7 @@ def chat():
 
 
 # =========================
-# Run App
+# RUN
 # =========================
 if __name__ == "__main__":
     app.run(debug=True)
