@@ -212,23 +212,21 @@ http://127.0.0.1:5000/ui
 ![Mixed Emotion](assets/mixed.png)
 
 ## 🧠 9. Key Learnings
-Emotion is not static — it evolves
-Transformers are strong, but lack explicit temporal reasoning
-System design matters as much as model design
+Emotion is not static — it evolves,
+Transformers are strong, but lack explicit temporal reasoning,
+System design matters as much as model design.
 
 ## ⚠️ 10. Limitations
-Trend logic is rule-based
-LSTM can be improved further
-No backend database (uses local storage)
+Trend logic is rule-based,
+LSTM can be improved further,
+No backend database (uses local storage).
 
 ## 🚀 11. Future Improvements
-Multi-chat sessions (like ChatGPT)
-Database integration
-Better temporal modeling
-Deployment as web app
-Improved emotion calibration
-Advanced UI enhancements
-LLM integration 
+Database integration,
+Better temporal modeling,
+Deployment as web app,
+Improved emotion calibration,
+Advanced UI enhancements.
 
 🤝 Contributions
 
