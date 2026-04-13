@@ -183,12 +183,12 @@ Narrative-Emotion-Classifier/
 # 🎮  How to Use the System
 
 ## 🛠️ How to Run
-
+```
 git clone https://github.com/Adityaraj614/Narrative-Emotion-Classifier.git
 cd Narrative-Emotion-Classifier
 pip install -r requirements.txt
 python src/api.py
-
+```
 Open in browser:
 http://127.0.0.1:5000/ui
 ---
